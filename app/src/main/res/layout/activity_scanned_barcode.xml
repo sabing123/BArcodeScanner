@@ -22,9 +22,11 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginTop="312dp"
-        android:layout_marginEnd="119dp"
-        android:text="No Barcode Detected"
+        android:layout_marginTop="311dp"
+        android:layout_marginEnd="170dp"
+        android:gravity="center"
+        android:visibility="invisible"
+        android:text="Scanning...."
         android:textColor="@android:color/white"
         android:textSize="20sp" />
 
@@ -33,6 +35,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:text="ADD CONTENT IN THE MAIL" />
+            android:text="Please wait!  Scanning....." />
 
     </RelativeLayout>

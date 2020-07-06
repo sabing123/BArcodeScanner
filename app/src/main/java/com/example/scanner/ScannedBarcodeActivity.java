@@ -38,21 +38,16 @@ public class ScannedBarcodeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scanned_barcode);
-
         initViews();
     }
 
     private void initViews() {
-
         txtBarcodeValue = findViewById(R.id.txtBarcodeValue);
         surfaceView = findViewById(R.id.surfaceView);
         btnAction = findViewById(R.id.btnAction);
-
-
         btnAction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if (intentData.length() > 0) {
                     if (isEmail)
                         startActivity(new Intent(ScannedBarcodeActivity.this, MainActivity.class));
@@ -60,8 +55,6 @@ public class ScannedBarcodeActivity extends AppCompatActivity {
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(intentData)));
                     }
                 }
-
-
             }
         });
     }
@@ -116,34 +109,48 @@ public class ScannedBarcodeActivity extends AppCompatActivity {
             public void receiveDetections(Detector.Detections<Barcode> detections) {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
                 if (barcodes.size() != 0) {
-
-
-                    txtBarcodeValue.post(new Runnable() {
-
-                        @Override
-                        public void run() {
-
-                            if (barcodes.valueAt(0).email != null) {
-                                txtBarcodeValue.removeCallbacks(null);
-                                intentData = barcodes.valueAt(0).email.address;
-                                txtBarcodeValue.setText(intentData);
-                                isEmail = true;
-                            } else {
+                    if(intentData.equals("9860560109")) {
+                        startActivity(new Intent(ScannedBarcodeActivity.this, MainActivity.class));
+                    }
+                    else{
+                        txtBarcodeValue.post(new Runnable() {
+                            @Override
+                            public void run() {
                                 isEmail = false;
-                                btnAction.setText("Open App");
-                                btnAction.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View view) {
-                                        Intent intent = new Intent(ScannedBarcodeActivity.this, MainActivity.class);
-                                        startActivity(intent);
-                                    }
-                                });
+                                btnAction.setText("Does Not Match Barcode");
+                                btnAction.setEnabled(false);
                                 intentData = barcodes.valueAt(0).displayValue;
                                 txtBarcodeValue.setText(intentData);
-
                             }
-                        }
-                    });
+                        });
+                    }
+
+//                    txtBarcodeValue.post(new Runnable() {
+//
+//                        @Override
+//                        public void run() {
+//
+//                            if (barcodes.valueAt(0).email != null) {
+//                                txtBarcodeValue.removeCallbacks(null);
+//                                intentData = barcodes.valueAt(0).email.address;
+//                                txtBarcodeValue.setText(intentData);
+//                                isEmail = true;
+//                            } else {
+//                                isEmail = false;
+//                                btnAction.setText("Open App");
+//                                btnAction.setOnClickListener(new View.OnClickListener() {
+//                                    @Override
+//                                    public void onClick(View view) {
+//                                        Intent intent = new Intent(ScannedBarcodeActivity.this, MainActivity.class);
+//                                        startActivity(intent);
+//                                    }
+//                                });
+//                                intentData = barcodes.valueAt(0).displayValue;
+//                                txtBarcodeValue.setText(intentData);
+//
+//                            }
+//                        }
+//                    });
 
                 }
             }
@@ -162,5 +169,5 @@ public class ScannedBarcodeActivity extends AppCompatActivity {
         super.onResume();
         initialiseDetectorsAndSources();
     }
-    }
+}
 
