@@ -4,7 +4,9 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -21,7 +23,15 @@ import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class ScannedBarcodeActivity extends AppCompatActivity {
     SurfaceView surfaceView;
@@ -32,6 +42,43 @@ public class ScannedBarcodeActivity extends AppCompatActivity {
     Button btnAction;
     String intentData = "";
     boolean isEmail = false;
+
+    // first String means Url is in string, Void mean nothing, Third String means return type will be in string
+    class QRCODEREADER extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... address) {
+            //String... means multiple address can be send. It acts as array
+            try {
+                URL url = new URL(address[0]);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                //Establish connection with address
+                connection.connect();
+
+                //retrieve data from url
+                InputStream is = connection.getInputStream();
+                InputStreamReader isr = new InputStreamReader(is);
+
+                //Retrieve data and return it as String
+                int data = isr.read();
+                String content = "";
+                char ch;
+                while (data != -1) {
+                    ch = (char) data;
+                    content = content + ch;
+                    data = isr.read();
+                }
+                Log.i("Content", content);
+                return content;
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+    }
 
 
     @Override
@@ -107,23 +154,52 @@ public class ScannedBarcodeActivity extends AppCompatActivity {
 
             @Override
             public void receiveDetections(Detector.Detections<Barcode> detections) {
+
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
                 if (barcodes.size() != 0) {
-                    if(intentData.equals("9860560109")) {
-                        startActivity(new Intent(ScannedBarcodeActivity.this, MainActivity.class));
-                    }
-                    else{
-                        txtBarcodeValue.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                isEmail = false;
-                                btnAction.setText("Does Not Match Barcode");
-                                btnAction.setEnabled(false);
-                                intentData = barcodes.valueAt(0).displayValue;
-                                txtBarcodeValue.setText(intentData);
+
+                    String details;
+
+                    QRCODEREADER qrcode = new QRCODEREADER();
+                    try {
+
+                        details = qrcode.execute("http://192.168.0.101:3000/QRscanner").get();
+                        //First we will check data is retrieve successfully or not
+                        Log.i("contentData", details);
+
+                        JSONArray array  = new JSONArray(details);
+                        String name = "";
+                        for (int i = 0; i < array.length(); i++) {
+                            JSONObject Qrcodepart = array.getJSONObject(i);
+                            name = Qrcodepart.getString("name");
+//                            txtBarcodeValue.setText(name);
+                            Log.i("QR data", name);
+
+                            if(intentData.equals(name)) {
+                                startActivity(new Intent(ScannedBarcodeActivity.this, MainActivity.class));
                             }
-                        });
+                            else{
+                                txtBarcodeValue.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        isEmail = false;
+                                        btnAction.setText("Does Not Match Barcode");
+                                        btnAction.setEnabled(false);
+                                        intentData = barcodes.valueAt(0).displayValue;
+                                        txtBarcodeValue.setText(intentData);
+                                    }
+                                });
+                            }
+
+                        }
+
+
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
+
+
 
 //                    txtBarcodeValue.post(new Runnable() {
 //
