@@ -35,6 +35,9 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'com.google.android.gms:play-services-vision:20.1.0'
 
+    //animation transition
+    implementation "com.andkulikov:transitionseverywhere:1.8.1"
+
 //emoji
     //noinspection GradleCompatible
     implementation "com.android.support:support-emoji:28.0.0"
